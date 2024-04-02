@@ -1,6 +1,3 @@
-![Python 3.8 3.9](https://github.com/f1tenth/f1tenth_gym/actions/workflows/ci.yml/badge.svg)
-![Docker](https://github.com/f1tenth/f1tenth_gym/actions/workflows/docker.yml/badge.svg)
-![Code Style](https://github.com/f1tenth/f1tenth_gym/actions/workflows/lint.yml/badge.svg)
 
 # The F1TENTH Gym environment
 
@@ -10,29 +7,74 @@ This project is still under heavy developement.
 
 You can find the [documentation](https://f1tenth-gym.readthedocs.io/en/latest/) of the environment here.
 
+## Tested Native Environment
+- Ubuntu Focal 20.04 (LTS)
+- with only CPU
+
 ## Quickstart
-We recommend installing the simulation inside a virtualenv. You can install the environment by running:
+
+<details>
+<summary>Docker Installation</summary>
+
+### Install Docker
+
+[Installation guide](https://docs.docker.com/engine/install/ubuntu/#install-using-the-repository)
 
 ```bash
-virtualenv gym_env
-source gym_env/bin/activate
-git clone https://github.com/f1tenth/f1tenth_gym.git
-cd f1tenth_gym
-pip install -e .
+# Install from get.docker.com
+curl -fsSL https://get.docker.com -o get-docker.sh
+sudo sh get-docker.sh
+sudo groupadd docker
+sudo usermod -aG docker $USER
 ```
+
+### Setup GPU for Docker
+[Installation guide](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html)
+```bash
+curl -fsSL https://nvidia.github.io/libnvidia-container/gpgkey | sudo gpg --dearmor -o /usr/share/keyrings/nvidia-container-toolkit-keyring.gpg \
+  && curl -s -L https://nvidia.github.io/libnvidia-container/stable/deb/nvidia-container-toolkit.list | \
+    sed 's#deb https://#deb [signed-by=/usr/share/keyrings/nvidia-container-toolkit-keyring.gpg] https://#g' | \
+    sudo tee /etc/apt/sources.list.d/nvidia-container-toolkit.list 
+
+sudo apt-get update
+
+sudo apt-get install -y nvidia-container-toolkit nvidia-container-runtime
+
+sudo nvidia-ctk runtime configure --runtime=docker
+
+sudo systemctl restart docker
+```
+</details>
+
+### Setup with Docker
+
+NOTE: Currently, tested on Ubuntu 20.04 with CPU-only.
+
+```bash
+# build container (without GPU support)
+make build-cpu
+# or build container (with GPU support)
+# make build-gpu
+```
+
+Open remote container via Vscode (Recommend)
+1. Open the folder using vscode
+2. Ctrl+P and select 'devcontainer rebuild and reopen in container'
+Then, you can skip the following commands
+
+```bash
+# [Optional] Run container via terminal (without GPU support)
+make bash-cpu
+# Or Run container via terminal (with GPU support)
+# make bash-gpu
+```
+
 
 Then you can run a quick waypoint follow example by:
 ```bash
 cd examples
 python3 waypoint_follow.py
 ```
-
-A Dockerfile is also provided with support for the GUI with nvidia-docker (nvidia GPU required):
-```bash
-docker build -t f1tenth_gym_container -f Dockerfile .
-docker run --gpus all -it -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix f1tenth_gym_container
-````
-Then the same example can be ran.
 
 ## Known issues
 - Library support issues on Windows. You must use Python 3.8 as of 10-2021
