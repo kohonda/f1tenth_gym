@@ -154,7 +154,11 @@ class Track:
             raise FileNotFoundError(f"It could not load track {track}") from ex
 
     @staticmethod
-    def from_refline(x: np.ndarray, y: np.ndarray, velx: np.ndarray,):
+    def from_refline(
+        x: np.ndarray,
+        y: np.ndarray,
+        velx: np.ndarray,
+    ):
         """
         Create an empty track reference line.
 

@@ -50,7 +50,7 @@ class PygameEnvRenderer(EnvRenderer):
         render_mode : str
             rendering mode in ["human", "human_fast", "rgb_array"]
         render_fps : int
-            number of frames per second            
+            number of frames per second
         """
         super().__init__()
         self.params = params

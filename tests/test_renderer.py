@@ -24,7 +24,11 @@ class TestRenderer(unittest.TestCase):
         }
         config = deep_update(base_config, config)
 
-        env = gym.make("f1tenth_gym:f1tenth-v0", config=config, render_mode=render_mode,)
+        env = gym.make(
+            "f1tenth_gym:f1tenth-v0",
+            config=config,
+            render_mode=render_mode,
+        )
 
         return env
 
