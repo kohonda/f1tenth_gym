@@ -34,7 +34,7 @@ RUN pip3 install --upgrade pip
 RUN pip3 install -U pip distlib setuptools wheel
 
 # utils
-# RUN apt-get update && apt-get install -y htop vim ffmpeg 
+RUN apt-get update && apt-get install -y htop vim ffmpeg 
 # RUN pip3 install jupyterlab ipywidgets && \
 #     echo 'alias jup="jupyter lab --ip 0.0.0.0 --port 8888 --allow-root &"' >> /root/.bashrc
 
@@ -47,20 +47,12 @@ RUN pip3 install PyOpenGL PyOpenGL_accelerate
 # pytorch for CPU only
 # RUN pip3 install torch==2.0.0 torchvision==0.15.1 torchaudio==2.0.1 --extra-index-url https://download.pytorch.org/whl/cpu
 
-# WORKDIR /workspace
-# COPY src/ src/
-# COPY pyproject.toml .
+WORKDIR /workspace
+COPY f1tenth_gym/ f1tenth_gym/
+COPY pyproject.toml .
+COPY README.md .
 
-# RUN pip3 install -e .[dev]
-
-# CMD ["bash"]
-
-RUN mkdir /f1tenth_gym
-COPY . /f1tenth_gym
-
-RUN cd /f1tenth_gym && \
-    pip3 install -e .
-
-WORKDIR /f1tenth_gym
+RUN pip3 install -e .
 
 CMD ["bash"]
+

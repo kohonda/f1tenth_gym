@@ -3,10 +3,14 @@ ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get -y update && apt-get -y install --no-install-recommends\
     software-properties-common\
-    libgl1-mesa-dev\
+    libgl1-mesa-dev \
     libgl1-mesa-glx \
+    libgl1-mesa-dri \
+    mesa-utils \
     libglew-dev \
     libosmesa6-dev \
+    fontconfig \
+    libfreetype6-dev \
     wget\
     libssl-dev\
     curl\
@@ -38,12 +42,13 @@ RUN apt-get update && apt-get install -y htop vim ffmpeg
 RUN rm -rf /var/lib/apt/lists/*
 
 # pytorch 2.0
-RUN pip3 install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --extra-index-url https://download.pytorch.org/whl/cu118
+# RUN pip3 install torch==2.0.0+cu118 torchvision==0.15.1+cu118 torchaudio==2.0.1 --extra-index-url https://download.pytorch.org/whl/cu118
 
 WORKDIR /workspace
-COPY src/ src/
+COPY f1tenth_gym/ f1tenth_gym/
 COPY pyproject.toml .
+COPY README.md .
 
-RUN pip3 install -e .[dev]
+RUN pip3 install -e .
 
 CMD ["bash"]

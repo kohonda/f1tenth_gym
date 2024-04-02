@@ -171,3 +171,5 @@ cython_debug/
 *.zip
 
 **/maps/*
+
+videos/

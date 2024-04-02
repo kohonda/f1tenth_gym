@@ -1,4 +1,5 @@
 import time
+import os
 import gymnasium as gym
 import gymnasium.wrappers
 import numpy as np
@@ -15,7 +16,7 @@ def main():
     }
 
     env = gym.make(
-        "f1tenth_gym:f1tenth-v0,
+        "f1tenth_gym:f1tenth-v0",
         config={
             "map": "Spielberg",
             "num_agents": 1,
@@ -28,7 +29,15 @@ def main():
         },
         render_mode="rgb_array",
     )
-    env = gymnasium.wrappers.RecordVideo(env, f"video_{time.time()}")
+
+    # check folder exists
+    if not os.path.exists("videos"):
+        os.makedirs("videos")
+
+    video_path = os.path.join("videos", f"video_{time.time()}")
+
+    env = gymnasium.wrappers.RecordVideo(env, video_path)
+
     track = env.unwrapped.track
 
     planner = PurePursuitPlanner(track=track, wb=0.17145 + 0.15875)
