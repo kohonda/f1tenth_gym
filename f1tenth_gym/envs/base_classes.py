@@ -415,6 +415,8 @@ class Simulator(object):
         self.model = model
 
         # initializing agents
+        num_beams = self.params["num_beams"] if "num_beams" in self.params else 1080
+        fov = self.params["fov"] if "fov" in self.params else 4.7
         for i in range(self.num_agents):
             car = RaceCar(
                 params,
@@ -424,8 +426,8 @@ class Simulator(object):
                 integrator=integrator,
                 model=model,
                 action_type=action_type,
-                num_beams=self.params["num_beams"],
-                fov=self.params["fov"],
+                num_beams=num_beams,
+                fov=fov,
             )
             self.agents.append(car)
 

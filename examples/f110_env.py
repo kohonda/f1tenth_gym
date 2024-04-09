@@ -16,7 +16,7 @@ env = gym.make(
         "control_input": ["speed", "steering_angle"],
         "model": "st",
         "observation_config": {"type": "original"},
-        "params": {"mu": 1.0, "num_beams": 1080, "fov": 4.7},
+        "params": {"mu": 1.0},
         "reset_config": {"type": "rl_random_static"},
     },
     render_mode="human",
@@ -32,7 +32,5 @@ start = time.time()
 while not done:
     action = env.action_space.sample()
     obs, step_reward, done, truncated, info = env.step(action)
-    print(obs["scans"].shape)
-    exit()
     laptime += step_reward
     frame = env.render()
