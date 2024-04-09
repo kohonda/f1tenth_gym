@@ -424,6 +424,8 @@ class Simulator(object):
                 integrator=integrator,
                 model=model,
                 action_type=action_type,
+                num_beams=self.params["num_beams"],
+                fov=self.params["fov"],
             )
             self.agents.append(car)
 
