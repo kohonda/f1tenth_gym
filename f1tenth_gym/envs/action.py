@@ -206,11 +206,12 @@ class CarAction:
 
 
 def from_single_to_multi_action_space(
-    single_agent_action_space: gym.spaces.Box, num_agents: int
+    single_agent_action_space: gym.spaces.Box, num_agents: int, seed: int = 42
 ) -> gym.spaces.Box:
     return gym.spaces.Box(
         low=single_agent_action_space.low[None].repeat(num_agents, 0),
         high=single_agent_action_space.high[None].repeat(num_agents, 0),
         shape=(num_agents, single_agent_action_space.shape[0]),
         dtype=np.float32,
+        seed=seed,
     )

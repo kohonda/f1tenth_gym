@@ -162,7 +162,7 @@ class F110Env(gym.Env):
 
         # action space
         self.action_space = from_single_to_multi_action_space(
-            self.action_type.space, self.num_agents
+            self.action_type.space, self.num_agents, seed=self.seed
         )
 
         # reset modes
@@ -277,7 +277,7 @@ class F110Env(gym.Env):
         temp_y[idx2] = -right_t - temp_y[idx2]
         temp_y[np.invert(np.logical_or(idx1, idx2))] = 0
 
-        dist2 = delta_pt[0, :] ** 2 + temp_y ** 2
+        dist2 = delta_pt[0, :] ** 2 + temp_y**2
         closes = dist2 <= 0.1
         for i in range(self.num_agents):
             if closes[i] and not self.near_starts[i]:
