@@ -26,6 +26,7 @@ Author: Hongrui Zheng
 
 # gym imports
 import gymnasium as gym
+import copy
 
 from .action import CarAction, from_single_to_multi_action_space
 from .integrator import IntegratorType
@@ -249,6 +250,27 @@ class F110Env(gym.Env):
                 self.action_space = from_single_to_multi_action_space(
                     self.action_type.space, self.num_agents
                 )
+
+    def sync_env(self, original_env):
+        """
+        Syncs the environment with another environment
+
+        Args:
+            original_env (F110Env): environment to sync with
+
+        Returns:
+            None
+        """
+        self.poses_x = original_env.poses_x.copy()
+        self.poses_y = original_env.poses_y.copy()
+        self.poses_theta = original_env.poses_theta.copy()
+        self.collisions = original_env.collisions.copy()
+
+        self.sim.agent_poses = original_env.sim.agent_poses.copy()
+        self.sim.agent_scans = original_env.sim.agent_scans.copy()
+        self.sim.agent_steerings = original_env.sim.agent_steerings.copy()
+
+        self.sim.agents = copy.deepcopy(original_env.sim.agents)
 
     def _check_done(self):
         """
