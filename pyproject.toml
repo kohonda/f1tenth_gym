@@ -34,7 +34,8 @@ packages = [
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"
-gymnasium = "^0.29.1"
+# original gymnasium version is ^0.29.1, but we need 0.28.1 for sb3 and tianshou
+gymnasium = ">=0.28.1"
 moviepy = "^1.0.3"
 numpy = "<=1.25,>=1.18"
 pillow = ">=9.0.1"
