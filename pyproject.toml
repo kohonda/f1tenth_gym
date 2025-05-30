@@ -1,7 +1,6 @@
 [build-system]
 requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
-backend-path = ["."]
 
 [project]
 name = "f1tenth_gym"
@@ -37,5 +36,6 @@ dev = [
     "flake8>=7.0.0",
 ]
 
-[tool.setuptools.packages.find]
-where = ["f1tenth_gym"]
+[tool.setuptools]
+package-dir = {"f1tenth_gym" = "f1tenth_gym"}
+packages = ["f1tenth_gym"]
