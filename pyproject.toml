@@ -38,3 +38,6 @@ dev = [
 
 [tool.setuptools]
 packages = {find = {}}
+
+[tool.setuptools.package-data]
+"f1tenth_gym.envs.rendering" = ["*.yaml"]
