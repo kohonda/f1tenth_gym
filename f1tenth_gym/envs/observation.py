@@ -125,7 +125,13 @@ class OriginalObservation(Observation):
             collision = self.env.sim.collisions[i]
 
             x, y, theta = agent.state[xi], agent.state[yi], agent.state[yawi]
-            vx, vy = agent.state[vxi], 0.0
+            vlong = agent.state[vxi]
+            beta = (
+                0.0 if len(agent.state) < 7 else agent.state[slipi]
+            )  # set 0.0 when KST Model
+            vx = vlong
+            # vx = vlong * np.cos(beta)
+            vy = vlong * np.sin(beta)
             angvel = (
                 0.0 if len(agent.state) < 7 else agent.state[yaw_ratei]
             )  # set 0.0 when KST Model
@@ -223,7 +229,8 @@ class FeaturesObservation(Observation):
             lap_count = self.env.lap_counts[i]
 
             x, y, theta = agent.state[xi], agent.state[yi], agent.state[yawi]
-            vx, vy = agent.state[vxi], 0.0
+            vx = agent.state[vxi]
+            vlong = agent.state[vxi]
             delta = agent.state[deltai]
             beta = (
                 0.0 if len(agent.state) < 7 else agent.state[slipi]
@@ -231,6 +238,8 @@ class FeaturesObservation(Observation):
             angvel = (
                 0.0 if len(agent.state) < 7 else agent.state[yaw_ratei]
             )  # set 0.0 when KST Model
+            vx = vlong * np.cos(beta)
+            vy = vlong * np.sin(beta)
 
             # create agent's observation dict
             agent_obs = {
