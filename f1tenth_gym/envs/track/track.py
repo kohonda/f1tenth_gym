@@ -113,7 +113,7 @@ class Track:
         try:
             track_dir = find_track_dir(track)
             track_spec = Track.load_spec(
-                track=track, filespec=str(track_dir / f"{track_dir.stem}_map.yaml")
+                track=track, filespec=str(track_dir / f"{track_dir.stem}.yaml")
             )
 
             # load occupancy grid
