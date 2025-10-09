@@ -32,7 +32,12 @@ from .dynamic_models import DynamicModel
 from .action import CarAction
 from .collision_models import collision_multiple, get_vertices
 from .integrator import EulerIntegrator, IntegratorType
-from .laser_models import ScanSimulator2D, check_ttc_jit, ray_cast
+from .laser_models import (
+    ScanSimulator2D,
+    check_ttc_jit,
+    check_vehicle_collision_jit,
+    ray_cast,
+)
 from .track import Track
 
 
@@ -121,6 +126,13 @@ class RaceCar(object):
 
         # collision threshold for iTTC to environment
         self.ttc_thresh = 0.005
+
+        # collision margin for geometric collision check (in meters)
+        self.collision_margin = params["collision_margin"]
+
+        # collision exit margin (hysteresis to prevent jittering)
+        # Must be larger than collision_margin to create hysteresis
+        self.collision_exit_margin = params["collision_exit_margin"]
 
         # initialize scan sim
         if RaceCar.scan_simulator is None:
@@ -241,7 +253,8 @@ class RaceCar(object):
 
     def check_ttc(self, current_scan):
         """
-        Check iTTC against the environment, sets vehicle states accordingly if collision occurs.
+        Check iTTC against the environment with hysteresis to prevent jittering.
+        Uses different thresholds for entering and exiting collision state.
         Note that this does NOT check collision with other agents.
 
         state is [x, y, steer_angle, vel, yaw_angle, yaw_rate, slip_angle]
@@ -250,10 +263,11 @@ class RaceCar(object):
             current_scan
 
         Returns:
-            None
+            in_collision (bool): whether collision occurred
         """
 
-        in_collision = check_ttc_jit(
+        # First check using iTTC (original method for fast-moving vehicles)
+        in_collision_ittc = check_ttc_jit(
             current_scan,
             self.state[3],
             self.scan_angles,
@@ -262,13 +276,53 @@ class RaceCar(object):
             self.ttc_thresh,
         )
 
+        # Geometric collision detection with hysteresis
+        # Use different margins depending on current collision state
+        in_collision_geom = False
+        scan_sim = RaceCar.scan_simulator
+        if scan_sim.dt is not None:
+            vehicle_pose = np.array([self.state[0], self.state[1], self.state[4]])
+
+            # Hysteresis: use larger margin to exit collision than to enter
+            margin_to_use = (
+                self.collision_exit_margin
+                if self.in_collision
+                else self.collision_margin
+            )
+
+            in_collision_geom = check_vehicle_collision_jit(
+                vehicle_pose,
+                self.params["length"],
+                self.params["width"],
+                scan_sim.orig_x,
+                scan_sim.orig_y,
+                scan_sim.orig_c,
+                scan_sim.orig_s,
+                scan_sim.map_height,
+                scan_sim.map_width,
+                scan_sim.map_resolution,
+                scan_sim.dt,
+                margin_to_use,
+            )
+
+        in_collision = in_collision_ittc or in_collision_geom
+
         # if in collision stop vehicle
         if in_collision:
-            self.state[3:] = 0.0
-            self.accel = 0.0
-            self.steer_angle_vel = 0.0
+            if self.model == DynamicModel.KS:
+                self.state[3] = 0.0  # set velocity to zero
+                self.accel = 0.0  # clear acceleration
+                self.steer_angle_vel = 0.0  # clear steering velocity
+            elif self.model == DynamicModel.ST:
+                self.state[3] = 0.0  # set velocity to zero
+                self.state[5] = 0.0  # set yaw rate to zero
+                self.state[6] = 0.0  # set slip angle to zero
+                self.accel = 0.0  # clear acceleration
+                self.steer_angle_vel = 0.0  # clear steering velocity
+            else:
+                raise ValueError("Unknown model type for collision response.")
 
-        # update state
+        # Update collision state
         self.in_collision = in_collision
 
         return in_collision

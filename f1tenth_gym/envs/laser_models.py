@@ -248,6 +248,94 @@ def get_scan(
     return scan
 
 
+@njit(cache=True)
+def check_vehicle_collision_jit(
+    pose,
+    length,
+    width,
+    orig_x,
+    orig_y,
+    orig_c,
+    orig_s,
+    height,
+    width_map,
+    resolution,
+    dt,
+    collision_margin,
+):
+    """
+    Checks if vehicle body collides with environment using distance transform
+
+    Args:
+        pose (np.ndarray(3, )): vehicle pose [x, y, theta]
+        length (float): vehicle length
+        width (float): vehicle width
+        orig_x (float): map origin x
+        orig_y (float): map origin y
+        orig_c (float): cos of map origin angle
+        orig_s (float): sin of map origin angle
+        height (int): map height in cells
+        width_map (int): map width in cells
+        resolution (float): map resolution (m/cell)
+        dt (np.ndarray): distance transform matrix
+        collision_margin (float): safety margin in meters
+
+    Returns:
+        in_collision (bool): whether vehicle is in collision
+    """
+    # Calculate four corners of the vehicle
+    x, y, theta = pose[0], pose[1], pose[2]
+    cos_th = np.cos(theta)
+    sin_th = np.sin(theta)
+
+    # Half dimensions with margin
+    half_length = (length / 2.0) + collision_margin
+    half_width = (width / 2.0) + collision_margin
+
+    # Four corners in vehicle frame, then transform to world frame
+    corners = np.array(
+        [
+            [half_length, half_width],  # front-left
+            [half_length, -half_width],  # front-right
+            [-half_length, -half_width],  # rear-right
+            [-half_length, half_width],  # rear-left
+        ]
+    )
+
+    # Check each corner and center
+    for i in range(4):
+        # Transform corner to world frame
+        corner_x = x + corners[i, 0] * cos_th - corners[i, 1] * sin_th
+        corner_y = y + corners[i, 0] * sin_th + corners[i, 1] * cos_th
+
+        # Get distance to nearest obstacle
+        dist = distance_transform(
+            corner_x,
+            corner_y,
+            orig_x,
+            orig_y,
+            orig_c,
+            orig_s,
+            height,
+            width_map,
+            resolution,
+            dt,
+        )
+
+        # If distance is too small, vehicle is in collision
+        if dist < collision_margin:
+            return True
+
+    # Also check center point
+    dist_center = distance_transform(
+        x, y, orig_x, orig_y, orig_c, orig_s, height, width_map, resolution, dt
+    )
+    if dist_center < collision_margin:
+        return True
+
+    return False
+
+
 @njit(cache=True, error_model="numpy")
 def check_ttc_jit(scan, vel, scan_angles, cosines, side_distances, ttc_thresh):
     """
